@@ -4,14 +4,13 @@ import {
   FiActivity,
   FiFileText,
   FiShoppingBag,
-  FiHeart,
   FiCheckSquare,
   FiCoffee,
 } from "react-icons/fi";
 import Footer from "./Footer";
-import img1 from '../images/prr.png';
-import img2 from '../images/ch.png';
-import bannerImg from '../images/bb.png'; // Add a banner image
+import img1 from "../images/prr.png";
+import img2 from "../images/ch.png";
+import bannerImg from "../images/bb.png";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Nav2 from "./Nav2";
@@ -49,14 +48,6 @@ const pregnancyCards = [
     bg: "bg-orange-100",
     color: "text-orange-600",
   },
-  // {
-  //   title: "Kick Counter",
-  //   desc: "Track baby movements daily",
-  //   icon: FiHeart,
-  //   link: "/pregnancy/kicks",
-  //   bg: "bg-red-100",
-  //   color: "text-red-600",
-  // },
   {
     title: "Pregnancy Store",
     desc: "Safe products & essentials",
@@ -74,27 +65,39 @@ const slides = [
 
 const Home2 = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
       <Nav2 />
 
       {/* Carousel */}
-      <main className="pt-4 ml-32">
-        <Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false} showArrows={false} interval={4000}>
+      <main className="pt-6 px-4 sm:px-6 lg:px-10">
+        <Carousel
+          autoPlay
+          infiniteLoop
+          showThumbs={false}
+          showStatus={false}
+          showArrows={false}
+          interval={4000}
+        >
           {slides.map((slide, index) => (
             <div key={index}>
-              <div className="max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-2 gap-14 items-center min-h-[90vh]">
+<div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center min-h-[70vh] md:min-h-[85vh] md:pl-16 lg:pl-24">
                 <div className="text-center md:text-left">
-                  <h1 className="text-4xl md:text-5xl font-bold text-[#3f2d2d] mb-6 leading-tight">
-                    Embrace the Miracle of <span className="text-[#e08594]">Your Pregnancy Journey</span>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#3f2d2d] mb-6 leading-tight">
+                    Embrace the Miracle of{" "}
+                    <span className="text-[#e08594]">
+                      Your Pregnancy Journey
+                    </span>
                   </h1>
-                  <p className="text-lg md:text-xl text-[#795e5e]/60 max-w-md">
+
+                  <p className="text-base sm:text-lg md:text-xl text-[#795e5e]/60 max-w-md mx-auto md:mx-0">
                     {slide.text}
                   </p>
                 </div>
+
                 <img
                   src={slide.image}
                   alt={`slide-${index}`}
-                  className="h-[350px] lg:h-[380px] object-contain mx-auto"
+                  className="h-[220px] sm:h-[280px] md:h-[320px] lg:h-[380px] object-contain mx-auto w-full"
                 />
               </div>
             </div>
@@ -102,39 +105,43 @@ const Home2 = () => {
         </Carousel>
       </main>
 
-      {/* Banner Section */}
-     
-      {/* Statistics / Metrics Section */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-[#e08594] mb-2">2M+</h2>
-            <p className="text-[#4b5f66] text-lg">Active Users</p>
+      {/* Statistics */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10 text-center">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#e08594] mb-2">2M+</h2>
+            <p className="text-[#4b5f66] text-base sm:text-lg">Active Users</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-[#e08594] mb-2">98%</h2>
-            <p className="text-[#4b5f66] text-lg">Accuracy Rate</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#e08594] mb-2">98%</h2>
+            <p className="text-[#4b5f66] text-base sm:text-lg">Accuracy Rate</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-[#e08594] mb-2">4.9★</h2>
-            <p className="text-[#4b5f66] text-lg">App Rating</p>
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#e08594] mb-2">4.9★</h2>
+            <p className="text-[#4b5f66] text-base sm:text-lg">App Rating</p>
           </div>
         </div>
       </section>
- <section className="max-w-7xl w-[1300px] mx-auto px-6 mt-20 mb-20">
-        <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg flex flex-col md:flex-row items-center gap-6 p-10">
+
+      {/* Banner Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-12 sm:mt-20 mb-16 sm:mb-20">
+        <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg flex flex-col md:flex-row items-center gap-6 p-6 sm:p-10">
+
           <img
             src={bannerImg}
             alt="Baby growth illustration"
-            className="w-[100px] -ml-20 md:w-1/2 h-[300px] object-contain"
+            className="w-full max-w-xs sm:max-w-sm md:w-1/2 h-[220px] sm:h-[260px] md:h-[300px] object-contain"
           />
+
           <div className="md:w-1/2 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#e08594] mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#e08594] mb-4">
               Week-by-Week Growth
             </h2>
-            <p className="text-[#4b5f66] text-lg md:text-xl mb-4">
+
+            <p className="text-[#4b5f66] text-base sm:text-lg md:text-xl mb-4">
               Stay informed about your baby's development and learn what to expect each week.
             </p>
+
             <Link
               to="/pregnancy/tracker"
               className="inline-block bg-[#e08594] text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform duration-300"
@@ -146,25 +153,30 @@ const Home2 = () => {
       </section>
 
       {/* Option Cards */}
-      <section className="max-w-7xl mx-auto px-6 pt-28 pb-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-serif font-semibold text-[#3f2d2d] mb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-serif font-semibold text-[#3f2d2d] mb-4">
           Pregnancy Care
         </h1>
-        <p className="text-[#8a7f7f] max-w-xl mx-auto">
+
+        <p className="text-[#8a7f7f] max-w-xl mx-auto text-sm sm:text-base">
           A calm space designed to support you through every stage of pregnancy
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 mt-12 sm:mt-14">
           {pregnancyCards.map((item, index) => {
             const Icon = item.icon;
             return (
               <Link key={index} to={item.link} className="group">
-                <div className="bg-white rounded-[28px] p-10 text-center shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(224,133,148,0.18)]">
-                  <div className={`mx-auto mb-7 w-16 h-16 flex items-center justify-center rounded-2xl ${item.bg}`}>
-                    <Icon className={`${item.color} text-2xl`} />
+                <div className="bg-white rounded-[28px] p-6 sm:p-8 md:p-10 text-center shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(224,133,148,0.18)]">
+                  <div className={`mx-auto mb-6 sm:mb-7 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl ${item.bg}`}>
+                    <Icon className={`${item.color} text-xl sm:text-2xl`} />
                   </div>
-                  <h3 className="text-lg font-semibold text-[#3f2d2d] mb-2">{item.title}</h3>
-                  <p className="text-sm text-[#795e5e] leading-relaxed">{item.desc}</p>
+                  <h3 className="text-lg font-semibold text-[#3f2d2d] mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[#795e5e] leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </Link>
             );
@@ -177,4 +189,4 @@ const Home2 = () => {
   );
 };
 
-export default Home2;
+export default Home2; 

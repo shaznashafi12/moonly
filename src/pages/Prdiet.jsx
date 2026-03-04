@@ -136,7 +136,13 @@ const Prdiet = () => {
           className="w-52 h-52 rounded-full object-cover shadow-md"
         />
       </div> */}
-
+<div className="max-w-4xl mx-auto my-10 px-6">
+  <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-2xl shadow-sm">
+    <p className="font-medium">
+      ⚠️ Note: This guide is for general information only. Please consult your doctor or a certified nutritionist for personalized diet instructions during pregnancy.
+    </p>
+  </div>
+</div>
       <Footer />
     </div>
   );
@@ -191,6 +197,7 @@ const WideCard = ({ icon, title, items, bg, border, image }) => (
         className="w-36 h-36 object-cover rounded-2xl shrink-0"
       />
     )}
+    
   </div>
 );
 

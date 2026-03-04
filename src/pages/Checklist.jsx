@@ -7,10 +7,52 @@ import {
 } from "react-icons/fa";
 import Nav2 from "./Nav2";
 import Footer from "./Footer";
+import { useEffect } from "react";
+import { saveChecklist, getChecklist } from "../api/api.js";
 
 /* ------------------ Reusable Checklist Card ------------------ */
 const ChecklistCard = ({ title, icon: Icon, items, color }) => {
   const [checked, setChecked] = useState([]);
+  const userId = "123"; // replace with real logged-in user id
+const [loaded, setLoaded] = useState(false);
+
+  // Load saved checklist when component mounts
+ useEffect(() => {
+  const loadData = async () => {
+    try {
+      const res = await getChecklist(userId);
+      const saved = res.data.data.find((c) => c.title === title);
+      if (saved) {
+        setChecked(saved.checkedItems);
+      }
+      setLoaded(true);   // 👈 important
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  loadData();
+}, [title]);
+
+
+  // Save whenever checked changes
+ useEffect(() => {
+  if (!loaded) return;   // 👈 prevents early save
+
+  const saveData = async () => {
+    try {
+      await saveChecklist({
+        userId,
+        title,
+        checkedItems: checked
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  saveData();
+}, [checked, loaded]);
 
   const toggleItem = (item) => {
     setChecked((prev) =>
@@ -19,6 +61,10 @@ const ChecklistCard = ({ title, icon: Icon, items, color }) => {
         : [...prev, item]
     );
   };
+  if (!userId || !title) {
+  return res.status(400).json({ message: "Missing required fields" });
+}
+
 
   const markAll = () => setChecked(items);
 

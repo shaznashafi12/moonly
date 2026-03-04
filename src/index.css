@@ -1,2 +1,27 @@
 @import "tailwindcss";
 
+/* Remove browser default password reveal icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
+}
+/* Remove autofill background + focus glow */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #F9F6F4 inset !important;
+  box-shadow: 0 0 0px 1000px #F9F6F4 inset !important;
+  -webkit-text-fill-color: #374151 !important; /* text-gray-700 */
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Remove default focus background */
+input:focus {
+  background-color: #F9F6F4 !important;
+}

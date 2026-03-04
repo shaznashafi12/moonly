@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { FaFilePdf, FaUpload, FaBell } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaFilePdf, FaUpload, FaBell, FaLock } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { FaLock } from "react-icons/fa";
-
+import { getReports } from "../api/api.js";
 
 const statusStyle = {
   Normal: "bg-emerald-50 text-emerald-700 border border-emerald-100",
@@ -11,37 +10,23 @@ const statusStyle = {
 };
 
 const Medica = () => {
-  const [reports] = useState([
-    {
-      id: 1,
-      name: "Blood Test Report",
-      date: "12 Jan 2026",
-      type: "Blood Test",
-      status: "Normal",
-      fileUrl: "/sample.pdf"
-    },
-    {
-      id: 2,
-      name: "Ultrasound Scan",
-      date: "05 Jan 2026",
-      type: "NT Scan – 12 Weeks",
-      status: "Normal",
-      fileUrl: "/ultrasound.pdf"
-    },
-    {
-      id: 3,
-      name: "Doctor Prescription",
-      date: "28 Dec 2025",
-      type: "Gynecologist Consultation",
-      status: "Review",
-      fileUrl: "/prescription.pdf"
-    }
-  ]);
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await getReports();
+        setReports(res.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch reports", error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-lilac-50 to-white px-6 py-8">
-
-    
 
       {/* Header */}
       <div className="flex justify-between items-end mb-7">
@@ -60,19 +45,20 @@ const Medica = () => {
           </button>
         </Link>
       </div>
+
       {/* Privacy Note */}
       <div className="mb-8 rounded-3xl bg-white/80 backdrop-blur-md border border-pink-100 px-6 py-5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-full bg-pink-100">
-    <FaLock className="text-[#e58a95] text-lg" />
-    </div>
-    <p className="text-sm text-black font-medium">
-      Your medical data is private and secure.
-    </p>
-  </div>
-</div>
+            <FaLock className="text-[#e58a95] text-lg" />
+          </div>
+          <p className="text-sm text-black font-medium">
+            Your medical data is private and secure.
+          </p>
+        </div>
+      </div>
 
-        {/* 🔔 Reminder Card */}
+      {/* Reminder Card */}
       <div className="mb-8 rounded-3xl bg-white/80 backdrop-blur-md border border-pink-100 px-6 py-5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-full bg-pink-100">
@@ -95,46 +81,55 @@ const Medica = () => {
 
       {/* Reports */}
       <div className="space-y-5">
-        {reports.map(report => (
-          <div
-            key={report.id}
-            className="bg-white rounded-3xl border border-gray-100 px-6 py-5 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex justify-between items-center">
-
-              {/* Left */}
-              <div className="flex gap-5">
-                <div className="p-4 rounded-2xl bg-pink-50">
-                  <FaFilePdf className="text-[#e58a95] text-2xl mt-3" />
-                </div>
-
-                <div>
-                  <h3 className="text-base font-semibold text-gray-800">
-                    {report.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {report.type} • {report.date}
-                  </p>
-
-                  <span
-                    className={`inline-block mt-3 text-xs px-3 py-1 rounded-full font-medium ${statusStyle[report.status]}`}
-                  >
-                    {report.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right */}
-              <a
-                href={report.fileUrl}
-                download
-                className="text-sm px-5 py-2.5 rounded-xl border border-pink-200 text-[#e58a95] font-medium hover:bg-pink-50 transition"
-              >
-                Download
-              </a>
-            </div>
+        {reports.length === 0 ? (
+          <div className="text-center text-gray-400 mt-10">
+            No reports uploaded yet.
           </div>
-        ))}
+        ) : (
+          reports.map(report => (
+            <div
+              key={report._id}
+              className="bg-white rounded-3xl border border-gray-100 px-6 py-5 shadow-sm hover:shadow-md transition"
+            >
+              <div className="flex justify-between items-center">
+
+                {/* Left */}
+                <div className="flex gap-5">
+                  <div className="p-4 rounded-2xl bg-pink-50">
+                    <FaFilePdf className="text-[#e58a95] text-2xl mt-3" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-800">
+                      {report.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {report.type} • {report.date}
+                    </p>
+
+                    <span
+                      className={`inline-block mt-3 text-xs px-3 py-1 rounded-full font-medium ${
+                        statusStyle[report.status] || ""
+                      }`}
+                    >
+                      {report.status}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right */}
+                <a
+                  href={report.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm px-5 py-2.5 rounded-xl border border-pink-200 text-[#e58a95] font-medium hover:bg-pink-50 transition"
+                >
+                  Download
+                </a>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -5,29 +5,27 @@ import { FaStar, FaPlus, FaMinus } from "react-icons/fa";
 import Nav from "./Nav";
 import Footer from "./Footer";
 
-const Addcart = () => {
+const Addcart2 = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
 
+  // Fetch product from backend like Addcart.jsx
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:4000/api/products/${id}`
-        );
+        const res = await axios.get(`http://localhost:4000/api/products/${id}`);
         setProduct(res.data);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching product:", error);
       }
     };
-
     fetchProduct();
   }, [id]);
 
   if (!product) {
-    return <div className="p-10">Loading...</div>;
+    return <div className="p-10">Loading product...</div>;
   }
 
   const totalPrice = product.price * qty;
@@ -92,6 +90,11 @@ const Addcart = () => {
                 <span className="text-xl font-bold text-[#051a2f]">
                   ₹{totalPrice}
                 </span>
+                {product.oldPrice && (
+                  <span className="line-through text-xs text-gray-400">
+                    ₹{product.oldPrice}
+                  </span>
+                )}
               </div>
 
               {/* Quantity Selector */}
@@ -122,7 +125,7 @@ const Addcart = () => {
                 <button
                   onClick={() =>
                     navigate("/checkout2", {
-                      state: { product, qty }
+                      state: { product, qty },
                     })
                   }
                   className="bg-[#051a2f] text-white w-[140px] md:w-[200px] px-5 py-2 rounded-lg text-sm font-medium"
@@ -132,8 +135,8 @@ const Addcart = () => {
 
                 <button
                   onClick={() =>
-                    navigate("/checkout2", {
-                      state: { product, qty }
+                    navigate("/checkout", {
+                      state: { product, qty },
                     })
                   }
                   className="bg-[#e08594] w-[140px] md:w-[200px] text-white px-5 py-2 rounded-lg text-sm font-medium"
@@ -152,4 +155,4 @@ const Addcart = () => {
   );
 };
 
-export default Addcart;
+export default Addcart2;

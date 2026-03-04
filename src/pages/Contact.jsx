@@ -9,18 +9,31 @@ const Contact = () => {
       <Nav />
 
       {/* Main Section */}
-      <section className="mt-2 pb-24 max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
-        
+      <section
+        className="
+        mt-6 sm:mt-10 
+        pb-16 sm:pb-24 
+        max-w-7xl mx-auto 
+        px-4 sm:px-6 lg:px-8 
+        grid grid-cols-1 md:grid-cols-2 
+        gap-10 sm:gap-16 
+        items-center
+      "
+      >
         {/* Left Content */}
         <div>
           {/* Glass badge */}
-          <span className="inline-block mb-6 px-5 py-1.5 rounded-full 
+          <span
+            className="
+            inline-block mb-6 px-5 py-1.5 rounded-full 
             bg-white/50 backdrop-blur-lg border border-white/40
-            text-sm text-[#6b4b4b] shadow-sm">
+            text-sm text-[#6b4b4b] shadow-sm
+          "
+          >
             We’re here for you
           </span>
 
-          <h1 className="text-4xl font-serif md:text-5xl font-bold text-[#e08594] leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#e08594] leading-tight">
             Get in Touch
           </h1>
 
@@ -54,19 +67,27 @@ const Contact = () => {
         </div>
 
         {/* Right Form */}
-        <div className="mt-20 bg-white/50 backdrop-blur-xl border border-white/40 
-          rounded-3xl shadow-lg p-6 md:p-7">
-
-          
+        <div
+          className="
+          mt-12 md:mt-20 
+          bg-white/50 backdrop-blur-xl border border-white/40 
+          rounded-3xl shadow-lg 
+          p-5 sm:p-6 md:p-7
+        "
+        >
           <form className="space-y-6">
             <div>
               <label className="text-sm font-medium">Full Name</label>
               <input
                 type="text"
                 placeholder="Your name"
-                className="mt-2 w-full px-4 py-3 rounded-xl bg-white/70 
-                border border-white/50 focus:outline-none 
-                focus:ring-2 focus:ring-[#e08594]"
+                className="
+                mt-2 w-full px-4 py-2.5 sm:py-3 
+                rounded-xl bg-white/70 
+                border border-white/50 
+                focus:outline-none 
+                focus:ring-2 focus:ring-[#e08594]
+              "
               />
             </div>
 
@@ -75,9 +96,13 @@ const Contact = () => {
               <input
                 type="email"
                 placeholder="you@example.com"
-                className="mt-2 w-full px-4 py-3 rounded-xl bg-white/70 
-                border border-white/50 focus:outline-none 
-                focus:ring-2 focus:ring-[#e08594]"
+                className="
+                mt-2 w-full px-4 py-2.5 sm:py-3 
+                rounded-xl bg-white/70 
+                border border-white/50 
+                focus:outline-none 
+                focus:ring-2 focus:ring-[#e08594]
+              "
               />
             </div>
 
@@ -86,9 +111,13 @@ const Contact = () => {
               <input
                 type="text"
                 placeholder="How can we help?"
-                className="mt-2 w-full px-4 py-3 rounded-xl bg-white/70 
-                border border-white/50 focus:outline-none 
-                focus:ring-2 focus:ring-[#e08594]"
+                className="
+                mt-2 w-full px-4 py-2.5 sm:py-3 
+                rounded-xl bg-white/70 
+                border border-white/50 
+                focus:outline-none 
+                focus:ring-2 focus:ring-[#e08594]
+              "
               />
             </div>
 
@@ -97,17 +126,25 @@ const Contact = () => {
               <textarea
                 rows="4"
                 placeholder="Write your message here..."
-                className="mt-2 w-full px-4 py-3 rounded-xl bg-white/70 
-                border border-white/50 focus:outline-none 
-                focus:ring-2 focus:ring-[#e08594]"
+                className="
+                mt-2 w-full px-4 py-2.5 sm:py-3 
+                rounded-xl bg-white/70 
+                border border-white/50 
+                focus:outline-none 
+                focus:ring-2 focus:ring-[#e08594]
+              "
               ></textarea>
             </div>
 
             <button
               type="submit"
-              className="w-full mt-4 bg-[#e08594] text-white 
-              py-3 rounded-xl font-medium 
-              hover:shadow-lg hover:scale-[1.02] transition"
+              className="
+              w-full mt-4 
+              bg-[#e08594] text-white 
+              py-2.5 sm:py-3 
+              rounded-xl font-medium 
+              hover:shadow-lg hover:scale-[1.02] transition
+            "
             >
               Send Message
             </button>
