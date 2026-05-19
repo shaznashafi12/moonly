@@ -40,23 +40,60 @@ const Signup = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+const validateForm = () => {
+  const { name, email, password, confirmPassword } = formData;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    const dataWithUserType = {
-      ...formData,
-      usertype: "user",
-    };
+  if (!name.trim()) {
+    toast.error("Name is required");
+    return false;
+  }
+
+  if (name.length < 3) {
+    toast.error("Name must be at least 3 characters");
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    toast.error("Enter a valid email address");
+    return false;
+  }
+
+  if (password.length < 6) {
+    toast.error("Password must be at least 6 characters");
+    return false;
+  }
+
+  const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+
+  if (!strongPassword.test(password)) {
+    toast.error("Password must contain uppercase, lowercase and number");
+    return false;
+  }
+
+  if (password !== confirmPassword) {
+    toast.error("Passwords do not match");
+    return false;
+  }
+
+  return true;
+};
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  const dataWithUserType = {
+    ...formData,
+    usertype: "user",
+  };
     try {
       const response = await regg(dataWithUserType);
       console.log(response);
       toast.success("Registered Successfully");
       setTimeout(() => {
-        navigate("/login");
+        navigate("/option");
       }, 3000);
     } catch (error) {
       console.error(error.message);

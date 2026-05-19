@@ -97,7 +97,7 @@ const Option = () => {
             <button
               onClick={() => chooseTracker("pregnancy")}
               style={{ backgroundColor: "rgba(224, 133, 148, 0.9)" }}
-              className="w-full text-white py-3 rounded-xl font-medium"
+              className="w-full mt-6 text-white py-3 rounded-xl font-medium"
             >
               Start Pregnancy Tracking →
             </button>

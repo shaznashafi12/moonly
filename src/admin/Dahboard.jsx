@@ -1,122 +1,293 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../admin/Sidebar.jsx";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  BarChart, Bar, ResponsiveContainer
 } from "recharts";
+import { getUsers, getOrders, getProducts } from "../api/api.js";
 
-// Sample data
-const dashboardData = {
-  totalUsers: 1200,
-  periodUsers: 800,
-  pregnancyUsers: 400,
-  productsPurchased: 650,
-  sessions: [
-    { month: "Jan", users: 100, periodUsers: 70, pregnancyUsers: 30, products: 50 },
-    { month: "Feb", users: 150, periodUsers: 90, pregnancyUsers: 60, products: 70 },
-    { month: "Mar", users: 200, periodUsers: 120, pregnancyUsers: 80, products: 90 },
-    { month: "Apr", users: 180, periodUsers: 100, pregnancyUsers: 80, products: 85 },
-    { month: "May", users: 250, periodUsers: 160, pregnancyUsers: 90, products: 120 },
-    { month: "Jun", users: 300, periodUsers: 200, pregnancyUsers: 100, products: 130 },
-  ]
-};
+const LOW_STOCK_THRESHOLD = 10;
 
 const Dahboard = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    periodUsers: 0,
+    pregnancyUsers: 0,
+  });
+  const [orderChartData, setOrderChartData] = useState([]);
+  const [productData, setProductData] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const usersRes = await getUsers();
+      const ordersRes = await getOrders();
+      const productsRes = await getProducts();
+
+      const users = usersRes.data;
+      const orders = ordersRes.data.data || [];
+      const products = productsRes.data;
+
+      setStats({
+        totalUsers: users.length,
+        periodUsers: users.filter(u => u.trackerType === "period").length,
+        pregnancyUsers: users.filter(u => u.trackerType === "pregnancy").length,
+      });
+
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const ordersByMonth = months.map((m, i) => {
+        const monthOrders = orders.filter(
+          o => o.createdAt && new Date(o.createdAt).getMonth() === i
+        );
+        return { month: m, orders: monthOrders.length };
+      });
+      setOrderChartData(ordersByMonth);
+
+      const sorted = [...orders].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setRecentOrders(sorted.slice(0, 5));
+
+      const approvedOrders = orders.filter(o => o.status === "Approved");
+      const productMap = {};
+      approvedOrders.forEach(order => {
+        order.items?.forEach(item => {
+          const product = products.find(p => p.name === item.name);
+          if (productMap[item.name]) {
+            productMap[item.name].sold += item.quantity;
+          } else {
+            productMap[item.name] = {
+              name: item.name,
+              shortName: item.name.length > 12 ? item.name.slice(0, 12) + "…" : item.name,
+              stock: product?.stock ?? 0,
+              sold: item.quantity,
+            };
+          }
+        });
+      });
+
+      setProductData(Object.values(productMap));
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen">
       <Sidebar active="Dashboard" />
+      <div className="flex-1 p-4 md:p-8 bg-gray-100 w-full">
+        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
-      <div className="flex-1 p-8 bg-gray-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
-
-        {/* Top Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
-          <MetricCard title="Total Users" value={dashboardData.totalUsers} />
-          <MetricCard title="Period Tracker Users" value={dashboardData.periodUsers} />
-          <MetricCard title="Pregnancy Users" value={dashboardData.pregnancyUsers} />
-          <MetricCard title="Products Purchased" value={dashboardData.productsPurchased} />
+        {/* Top Metrics — 3 cards, NO revenue */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6">
+          <MetricCard title="Total Users" value={stats.totalUsers} />
+          <MetricCard title="Period Tracker Users" value={stats.periodUsers} />
+          <MetricCard title="Pregnancy Tracker Users" value={stats.pregnancyUsers} />
         </div>
 
-        {/* Sessions by category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <Card title="Users Over Time">
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={dashboardData.sessions}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="users" stroke="#ec4899" />
-                <Line type="monotone" dataKey="periodUsers" stroke="#f472b6" />
-                <Line type="monotone" dataKey="pregnancyUsers" stroke="#a78bfa" />
-              </LineChart>
-            </ResponsiveContainer>
+        {/* Charts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+          {/* Orders Line Chart */}
+          <Card title="Orders Over Time">
+            <div className="w-full" style={{ height: 380 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={orderChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip cursor={false} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#ec4899"
+                    name="Orders"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
 
-        <Card title="Products Purchased Over Time">
-  <ResponsiveContainer width="100%" height={200}>
-    <BarChart data={dashboardData.sessions}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="month" />
-      <YAxis />
-      <Tooltip cursor={{ fill: "transparent" }} /> {/* <-- removes gray hover */}
-      <Bar dataKey="products" fill="#e08594" radius={[5,5,0,0]} />
-    </BarChart>
-  </ResponsiveContainer>
-</Card>
-
+          {/* Products Bar Chart — full height, scrollable, NO text below */}
+          <Card title="Approved Products Sold">
+            {productData.length === 0 ? (
+              <div className="flex items-center justify-center" style={{ height: 380 }}>
+                <p className="text-gray-400 text-sm">No approved orders yet.</p>
+              </div>
+            ) : (
+              <div className="w-full overflow-x-auto" style={{ height: 380 }}>
+                <div
+                  style={{
+                    width: Math.max(productData.length * 80, 400),
+                    height: 380,
+                  }}
+                >
+                  <BarChart
+                    width={Math.max(productData.length * 80, 400)}
+                    height={380}
+                    data={productData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 60 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="shortName"
+                      tick={{ fontSize: 12 }}
+                      angle={-35}
+                      textAnchor="end"
+                      interval={0}
+                    />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip
+                      cursor={false}
+                      formatter={(value, name, props) => [value, props.payload.name]}
+                    />
+                    <Bar
+                      dataKey="sold"
+                      fill="#e08594"
+                      radius={[5, 5, 0, 0]}
+                      name="Qty Sold"
+                    />
+                  </BarChart>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
 
-        {/* Additional device stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card title="Device Sessions">
-            <ResponsiveContainer width="100%" height={120}>
-              <BarChart layout="vertical" data={[
-                { name: "Desktop", value: 600 },
-                { name: "Mobile", value: 400 },
-                { name: "Tablet", value: 200 },
-              ]}>
-                <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" />
-                <Bar dataKey="value" fill="#e08594" radius={[5,5,5,5]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
+        {/* Recent Orders Table */}
+        <Card title="Recent Orders">
+          {recentOrders.length === 0 ? (
+            <p className="text-gray-400 text-sm">No orders found.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="text-gray-500 border-b border-gray-200">
+                    <th className="pb-2 font-medium">Customer</th>
+                    <th className="pb-2 font-medium">Items</th>
+                    <th className="pb-2 font-medium">Total</th>
+                    <th className="pb-2 font-medium">Status</th>
+                    <th className="pb-2 font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map(order => (
+                    <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 text-gray-700">
+                        <div className="font-medium">
+                          {order.shippingDetails?.fullName || "N/A"}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {order.shippingDetails?.phone || ""}
+                        </div>
+                      </td>
+                      <td className="py-2 text-gray-500">
+                        {order.items?.length
+                          ? order.items.map((item, i) => (
+                              <div key={i} className="text-xs">
+                                {item.name} × {item.quantity}
+                              </div>
+                            ))
+                          : "—"}
+                      </td>
+                      <td className="py-2 text-gray-700 font-medium">
+                        ₹{order.total ?? "—"}
+                      </td>
+                      <td className="py-2">
+                        <StatusBadge status={order.status} />
+                      </td>
+                      <td className="py-2 text-gray-400 text-xs">
+                        {order.createdAt
+                          ? new Date(order.createdAt).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
 
-          <Card title="Top Purchased Products">
-            <ul className="text-sm space-y-2">
-              <li>Organic Pads – 150</li>
-              <li>Pregnancy Starter Kit – 120</li>
-              <li>Vitamin Supplements – 100</li>
-              <li>Baby Clothes – 80</li>
-            </ul>
-          </Card>
+        {/* Product Stock Overview */}
+        <Card title="Product Stock Overview">
+          {productData.length === 0 ? (
+            <p className="text-gray-400 text-sm">No product data.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {productData.map(product => {
+                const isLow = product.stock < LOW_STOCK_THRESHOLD;
+                return (
+                  <div
+                    key={product.name}
+                    className={`p-3 rounded-lg shadow border ${
+                      isLow ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-gray-700 text-sm truncate">
+                        {product.name}
+                      </p>
+                      {isLow && (
+                        <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full ml-1 shrink-0">
+                          Low
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-sm ${isLow ? "text-red-500 font-semibold" : "text-gray-500"}`}>
+                      Stock: {product.stock}
+                    </p>
+                    <p className="text-xs text-gray-400">Sold: {product.sold}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
 
-          <Card title="Upcoming Reminders">
-            <ul className="text-sm space-y-2">
-              <li>Review blood report – 5 users</li>
-              <li>Check pregnancy scan – 3 users</li>
-              <li>Follow-up consultation – 2 users</li>
-            </ul>
-          </Card>
-        </div>
       </div>
     </div>
   );
 };
 
+const MetricCard = ({ title, value }) => (
+  <div className="bg-white p-4 md:p-6 rounded-3xl shadow border border-gray-200 text-center">
+    <p className="text-gray-500 text-sm">{title}</p>
+    <p className="text-2xl font-bold">{value}</p>
+  </div>
+);
+
 const Card = ({ title, children }) => (
-  <div className="bg-white p-4 rounded-3xl shadow border border-gray-200">
-    <h3 className="text-gray-700 font-semibold mb-2">{title}</h3>
+  <div className="bg-white p-4 md:p-6 rounded-3xl shadow border border-gray-200 mb-6">
+    <h3 className="text-gray-700 font-semibold mb-3">{title}</h3>
     {children}
   </div>
 );
 
-const MetricCard = ({ title, value }) => (
-  <div className="bg-white p-6 rounded-3xl shadow border border-gray-200 text-center">
-    <p className="text-gray-500 text-sm">{title}</p>
-    <p className="text-2xl font-bold text-gray-900">{value}</p>
-  </div>
-);
+const StatusBadge = ({ status }) => {
+  const colors = {
+    Delivered:  "bg-green-100 text-green-700",
+    Shipped:    "bg-blue-100 text-blue-700",
+    Pending:    "bg-yellow-100 text-yellow-700",
+    Processing: "bg-purple-100 text-purple-700",
+    Cancelled:  "bg-red-100 text-red-700",
+    Approved:   "bg-green-100 text-green-700",
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors["Pending"]}`}>
+      {status || "Pending"}
+    </span>
+  );
+};
 
 export default Dahboard;

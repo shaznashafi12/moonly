@@ -1,150 +1,187 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-import { FaStar, FaPlus, FaMinus } from "react-icons/fa";
+import { FaPlus, FaMinus, FaStar, FaTrash } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import Footer from "./Footer";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Addcart2 = () => {
-  const { id } = useParams();
+  const [cart, setCart] = useState([]);
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [qty, setQty] = useState(1);
 
-  // Fetch product from backend like Addcart.jsx
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await axios.get(`http://localhost:4000/api/products/${id}`);
-        setProduct(res.data);
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      }
-    };
-    fetchProduct();
-  }, [id]);
+  // Load Periods cart from localStorage
+useEffect(() => {
+  const savedCart = JSON.parse(localStorage.getItem("cart_periods")) || [];
+  setCart(savedCart);
+}, []);
+const increaseQty = (index) => {
+  const updated = [...cart];
+  updated[index].quantity += 1;
 
-  if (!product) {
-    return <div className="p-10">Loading product...</div>;
+  setCart(updated);
+  localStorage.setItem("cart_periods", JSON.stringify(updated));
+};
+
+const decreaseQty = (index) => {
+  const updated = [...cart];
+
+  if (updated[index].quantity > 1) {
+    updated[index].quantity -= 1;
+
+    setCart(updated);
+    localStorage.setItem("cart_periods", JSON.stringify(updated));
   }
+};
+const removeItem = (index) => {
+  const removedItem = cart[index];
 
-  const totalPrice = product.price * qty;
+  const ok = window.confirm(
+    `Are you sure you want to delete ${removedItem.name}?`
+  );
+  if (!ok) return;
+
+  // show toast first
+  toast.success(`${removedItem.name} removed from cart 🗑️`);
+
+  // delay the state change so the toast can render
+  setTimeout(() => {
+    const updatedCart = cart.filter((_, i) => i !== index);
+    setCart(updatedCart);
+    localStorage.setItem("cart_periods", JSON.stringify(updatedCart));
+  }, 150);
+};
+   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const discount = subtotal * 0.05;
+  const delivery = subtotal > 500 ? 0 : 40;
+  const total = subtotal - discount + delivery;
+
+  if (cart.length === 0) {
+  return (
+    <div className="min-h-screen mt-20 flex flex-col">
+      <Nav />
+<ToastContainer position="top-right" autoClose={2000} style={{ zIndex: 9999 }} />
+     <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 lg:px-16 text-center">
+  
+  <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#051a2f] mb-4">
+    Your cart is empty
+  </h2>
+
+  <p className="text-sm sm:text-base text-gray-500 max-w-md leading-relaxed">
+    Looks like you haven’t added anything yet. Browse our store and add your favorites to the cart.
+  </p>
+
+  <button
+    onClick={() => navigate("/cart")}
+    className="mt-6 w-full sm:w-auto bg-[#051a2f] text-white py-3 px-6 rounded-lg 
+               hover:bg-[#3b1d2a] mb-10 transition text-sm sm:text-base"
+  >
+    Continue Shopping
+  </button>
+
+</main>
+
+      <Footer />
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#fff7fb] overflow-x-hidden">
       <Nav />
+            <ToastContainer position="top-right" autoClose={2000} style={{ zIndex: 9999 }} />
 
-      <div className="flex justify-start ml-4 md:ml-20 mb-20">
+      <div className="max-w-6xl mx-auto px-4 py-10 mt-16">
+        <div className="mb-8">
+          <h2 className="text-3xl font-semibold">Your Cart</h2>
+<p className="text-sm text-gray-500">
+  <Link to="/home" className="hover:text-[#e08594]">
+    Home
+  </Link>{" "}
+  &gt;{" "}
+  <Link to="/cart" className="hover:text-[#e08594]">
+    Wellness Store
+  </Link>{" "}
+  &gt; Cart
+</p>  
+      </div>
 
-        {/* Breadcrumb Section */}
-        <div className="mt-20">
-          <h2 className="text-3xl font-semibold">Products</h2>
-          <p className="text-sm text-gray-500">
-            Home &gt; wellness store &gt; Add to Cart
-          </p>
-        </div>
+        <div className="grid md:grid-cols-[2fr_1fr] gap-8">
+          {/* Products */}
+          <div className="space-y-6">
+            {cart.map((item, index) => (
+<div key={index} className="bg-white rounded-2xl shadow p-6 relative">            
+  <button
+  onClick={() => removeItem(index)}
+  className="absolute top-4 right-4 text-red-500 hover:text-red-700"
+>
+  <FaTrash />
+</button>
+      <div className="flex gap-6">
+                  <img
+                    src={item.img || item.image}
+                    alt={item.name}
+                    className="w-[160px] h-[160px] md:w-[220px] md:h-[220px] object-contain rounded-2xl"
+                  />
+                  <div className="flex-1 space-y-3">
+                    <h1 className="text-xl font-semibold text-[#3b1d2a]">{item.name}</h1>
+                    <p className="text-sm text-gray-600">{item.description}</p>
 
-        {/* Product Card */}
-        <div
-          className="
-          bg-white rounded-2xl shadow p-5
-          w-[95%] md:w-[800px]
-          relative top-20 mb-20 mt-20
-          ml-4 md:-ml-[230px]
-        "
-        >
-          <div className="flex gap-5 items-start">
+                    <div className="flex items-center gap-1 text-yellow-500">
+                      {[...Array(5)].map((_, i) => <FaStar key={i} size={14} />)}
+                    </div>
 
-            {/* Product Image */}
-            <img
-              src={product.image}
-              alt={product.name}
-              className="
-                w-[160px] h-[160px]
-                md:w-[300px] md:h-[300px]
-                object-contain rounded-3xl
-              "
-            />
+                    <div className="text-xl font-bold text-[#051a2f]">
+                      ₹{item.price * item.quantity}
+                    </div>
 
-            {/* Product Details */}
-            <div className="flex-1 space-y-3">
-
-              <h1 className="text-xl font-semibold text-[#3b1d2a]">
-                {product.name}
-              </h1>
-
-              <p className="text-sm text-gray-600 leading-snug">
-                {product.description}
-              </p>
-
-              {/* Static Rating */}
-              <div className="flex items-center gap-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <FaStar key={i} size={13} />
-                ))}
-                <span className="text-xs text-gray-500 ml-1">(4.9)</span>
-              </div>
-
-              {/* Price */}
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-[#051a2f]">
-                  ₹{totalPrice}
-                </span>
-                {product.oldPrice && (
-                  <span className="line-through text-xs text-gray-400">
-                    ₹{product.oldPrice}
-                  </span>
-                )}
-              </div>
-
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => qty > 1 && setQty(qty - 1)}
-                    className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition"
-                  >
-                    <FaMinus size={12} />
-                  </button>
-
-                  <span className="px-4 text-sm font-semibold text-gray-800">
-                    {qty}
-                  </span>
-
-                  <button
-                    onClick={() => setQty(qty + 1)}
-                    className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition"
-                  >
-                    <FaPlus size={12} />
-                  </button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex border rounded-lg overflow-hidden">
+                        <button onClick={() => decreaseQty(index)} className="px-3 py-2 hover:bg-gray-100">
+                          <FaMinus size={12} />
+                        </button>
+                        <span className="px-4 py-2 font-semibold">{item.quantity}</span>
+                        <button onClick={() => increaseQty(index)} className="px-3 py-2 hover:bg-gray-100">
+                          <FaPlus size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
 
-              {/* Buttons */}
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() =>
-                    navigate("/checkout2", {
-                      state: { product, qty },
-                    })
-                  }
-                  className="bg-[#051a2f] text-white w-[140px] md:w-[200px] px-5 py-2 rounded-lg text-sm font-medium"
-                >
-                  Add to Cart
-                </button>
+          {/* Price Details */}
+          <div className="bg-white rounded-2xl shadow p-6 h-fit">
+            <h2 className="font-semibold text-lg mb-4 text-gray-800">Price Details</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span>Price ({cart.length} items)</span>
+                <span>₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between text-green-600">
+                <span>Discount (5%)</span>
+                <span>- ₹{discount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Delivery</span>
+                <span>{delivery === 0 ? "Free" : `₹${delivery}`}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between font-semibold text-base">
+                <span>Total Amount</span>
+                <span>₹{total}</span>
+              </div>
+              <p className="text-xs text-green-600">You saved ₹{discount} on this order 🎉</p>
 
+              <div className="mt-4">
                 <button
-                  onClick={() =>
-                    navigate("/checkout", {
-                      state: { product, qty },
-                    })
-                  }
-                  className="bg-[#e08594] w-[140px] md:w-[200px] text-white px-5 py-2 rounded-lg text-sm font-medium"
+                  onClick={() => navigate("/checkout")}
+                  className="w-full bg-[#051a2f] text-white py-3 rounded-lg hover:bg-[#3b1d2a] transition"
                 >
-                  Buy Now
+                  Checkout
                 </button>
               </div>
-
             </div>
           </div>
         </div>

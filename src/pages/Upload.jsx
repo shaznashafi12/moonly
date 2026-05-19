@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 const Upload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [reportName, setReportName] = useState("");
+  const [status, setStatus] = useState("Normal"); // new state for report status
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-const user = JSON.parse(localStorage.getItem("user"));
+
   const handleUpload = async () => {
     if (!selectedFile || !reportName) {
       alert("Please enter report name and select PDF");
@@ -18,22 +19,31 @@ const user = JSON.parse(localStorage.getItem("user"));
     try {
       setLoading(true);
 
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Please login again");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("name", reportName);
-    formData.append("userId", user._id); // 🔥 THIS LINE FIXES YOUR 400
+      formData.append("status", status); // <- include status
+      formData.append("userId", user._id);
+
       await uploadReport(formData);
 
       alert("Report uploaded successfully ✅");
 
       setSelectedFile(null);
       setReportName("");
+      setStatus("Normal"); // reset status to default
 
-      // Redirect to Medica page
       navigate("/medical");
-
     } catch (error) {
-      console.error(error);
+      console.error("UPLOAD ERROR:", error);
       alert("Upload failed ❌");
     } finally {
       setLoading(false);
@@ -67,6 +77,22 @@ const user = JSON.parse(localStorage.getItem("user"));
             placeholder="e.g. Blood Test, Scan Report"
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
           />
+        </div>
+
+        {/* New Status Dropdown */}
+        <div className="mb-4">
+          <label className="text-xs font-medium text-gray-600 mb-1 block">
+            Report Status
+          </label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          >
+            <option value="Normal">Normal</option>
+            <option value="Review">Review</option>
+            <option value="Critical">Critical</option>
+          </select>
         </div>
 
         <div className="mb-6 w-full">
@@ -111,6 +137,7 @@ const user = JSON.parse(localStorage.getItem("user"));
             onClick={() => {
               setSelectedFile(null);
               setReportName("");
+              setStatus("Normal");
             }}
             className="flex-1 py-2.5 rounded-xl bg-slate-100 border border-gray-200 text-gray-600 font-medium hover:bg-gray-200 transition"
           >

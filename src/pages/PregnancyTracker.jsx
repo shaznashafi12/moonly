@@ -9,6 +9,7 @@ import Nav2 from "./Nav2";
 import Footer from "./Footer";
 import imgg from "../images/bb1.png";
 import { createPregnancy, getLatestPregnancy } from "../api/api.js";
+import { Link } from "react-router-dom";
 
 const PregnancyTracker = () => {
   const [lmp, setLmp] = useState("");
@@ -21,13 +22,19 @@ const PregnancyTracker = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // helper for trimester image
+  const getTrimesterImage = (week) => {
+    if (!week || week === 0) return babyBanner;
+    if (week <= 13) return trimester1Img;
+    if (week <= 27) return trimester2Img;
+    return trimester3Img;
+  };
+
   useEffect(() => {
     const fetchLatest = async () => {
-      
       try {
         const res = await getLatestPregnancy();
         const data = res.data?.data;
-        console.log("Week from DB after refresh:", data.weekNumber);
 
         if (!data) return;
 
@@ -38,20 +45,8 @@ const PregnancyTracker = () => {
         setDueMonth(data.dueMonth);
         setBabySizeText(data.babySizeText);
 
-// Use REAL weekNumber from DB
-if (calculatedWeek > 40) {
-  setDevelopmentImage(babyBanner);
-}
-else if (currentWeek <= 13) {
-  setDevelopmentImage(trimester1Img);
-}
-else if (currentWeek <= 27) {
-  setDevelopmentImage(trimester2Img);
-}
-else {
-  setDevelopmentImage(trimester3Img);
-}
-
+        // restore trimester image from DB
+        setDevelopmentImage(getTrimesterImage(data.weekNumber));
 
       } catch (err) {
         console.log("No previous pregnancy found");
@@ -70,93 +65,69 @@ else {
 
     if (diffInDays < 0) return;
 
-    // ✅ REMOVED 40 WEEK LIMIT
+    let calculatedWeek = Math.floor(diffInDays / 7) + 1;
+    const currentWeek = calculatedWeek > 40 ? 40 : calculatedWeek;
+    const isOverdue = calculatedWeek > 40;
 
-// Lock at 40 weeks
-let calculatedWeek = Math.floor(diffInDays / 7) + 1;
+    const weekText = `Week ${currentWeek} of 40`;
 
-// Lock visible week at 40
-const currentWeek = calculatedWeek > 40 ? 40 : calculatedWeek;
+    const trimesterText =
+      currentWeek <= 13
+        ? "First Trimester"
+        : currentWeek <= 27
+        ? "Second Trimester"
+        : "Third Trimester";
 
-// Check if overdue (41+)
-const isOverdue = calculatedWeek > 40;
+    const dueDate = new Date(lmpDate);
+    dueDate.setDate(dueDate.getDate() + 280);
 
-// Week text
-const weekText = `Week ${currentWeek} of 40`;
+    const options = { month: "long", year: "numeric" };
+    const dueMonthText = dueDate.toLocaleDateString(undefined, options);
 
-// Trimester logic
-const trimesterText =
-  currentWeek <= 13
-    ? "First Trimester"
-    : currentWeek <= 27
-    ? "Second Trimester"
-    : "Third Trimester";
+    let sizeText = "";
 
-const dueDate = new Date(lmpDate);
-dueDate.setDate(dueDate.getDate() + 280);
-const options = { month: "long", year: "numeric" };
-const dueMonthText = dueDate.toLocaleDateString(undefined, options);
+    if (isOverdue)
+      sizeText = "The world is about to meet someone very special 🌍👣💫";
+    else if (currentWeek <= 8)
+      sizeText = "Your baby is about the size of a raspberry 🍇";
+    else if (currentWeek <= 12)
+      sizeText = "Your baby is about the size of a lime 🍋";
+    else if (currentWeek <= 16)
+      sizeText = "Your baby is about the size of an avocado 🥑";
+    else if (currentWeek <= 20)
+      sizeText = "Your baby is about the size of a banana 🍌";
+    else if (currentWeek <= 24)
+      sizeText = "Your baby is about the size of corn 🌽";
+    else if (currentWeek <= 28)
+      sizeText = "Your baby is about the size of an eggplant 🍆";
+    else if (currentWeek <= 32)
+      sizeText = "Your baby is about the size of a pineapple 🍍";
+    else if (currentWeek <= 36)
+      sizeText = "Your baby is about the size of a papaya 🥭";
+    else
+      sizeText = "Your baby is about the size of a watermelon 🍉";
 
-let sizeText = "";
+    setWeekNumber(currentWeek);
+    setWeek(weekText);
+    setTrimester(trimesterText);
+    setDueMonth(dueMonthText);
+    setBabySizeText(sizeText);
 
-if (isOverdue) {
-  sizeText =
-"The world is about to meet someone very special 🌍👣💫"}
-else if (currentWeek <= 8)
-  sizeText = "Your baby is about the size of a raspberry 🍇";
-else if (currentWeek <= 12)
-  sizeText = "Your baby is about the size of a lime 🍋";
-else if (currentWeek <= 16)
-  sizeText = "Your baby is about the size of an avocado 🥑";
-else if (currentWeek <= 20)
-  sizeText = "Your baby is about the size of a banana 🍌";
-else if (currentWeek <= 24)
-  sizeText = "Your baby is about the size of corn 🌽";
-else if (currentWeek <= 28)
-  sizeText = "Your baby is about the size of an eggplant 🍆";
-else if (currentWeek <= 32)
-  sizeText = "Your baby is about the size of a pineapple 🍍";
-else if (currentWeek <= 36)
-  sizeText = "Your baby is about the size of a papaya 🥭";
-else
-  sizeText = "Your baby is about the size of a watermelon 🍉";
+    // set trimester image
+    setDevelopmentImage(getTrimesterImage(currentWeek));
 
-setWeekNumber(currentWeek);
-setWeek(weekText);
-setTrimester(trimesterText);
-setDueMonth(dueMonthText);
-setBabySizeText(sizeText);
-
-// Image logic
-// Image logic (USE calculatedWeek, NOT data)
-// Image logic (use calculated values only)
-// Image logic based ONLY on stored weekNumber
-if (!data.weekNumber || data.weekNumber === 0) {
-  setDevelopmentImage(babyBanner);
-}
-else if (data.weekNumber > 40) {
-  setDevelopmentImage(babyBanner);
-}
-else if (data.weekNumber <= 13) {
-  setDevelopmentImage(trimester1Img);
-}
-else if (data.weekNumber <= 27) {
-  setDevelopmentImage(trimester2Img);
-}
-else {
-  setDevelopmentImage(trimester3Img);
-}    try {
+    try {
       setLoading(true);
       setError("");
 
-await createPregnancy({
-  lmp,
-  week: weekText,
-  weekNumber: calculatedWeek,  // ✅ keep this
-  trimester: trimesterText,
-  dueMonth: dueMonthText,
-  babySizeText: sizeText,
-});
+      await createPregnancy({
+        lmp,
+        week: weekText,
+        weekNumber: calculatedWeek,
+        trimester: trimesterText,
+        dueMonth: dueMonthText,
+        babySizeText: sizeText,
+      });
 
     } catch (err) {
       setError(err?.message || "Failed to save pregnancy data");
@@ -165,6 +136,7 @@ await createPregnancy({
     }
   };
 
+  // your careTips logic remains unchanged
   let careTips = { rest: "", comfort: "", health: "", emotional: "" };
 
   if (trimester === "First Trimester") {
@@ -189,13 +161,23 @@ await createPregnancy({
       emotional: "It’s normal to feel anxious. Practice breathing exercises and stay positive."
     };
   }
+
     return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
       <Nav2 />
+      {/* Page Header / Breadcrumb */}
+{/* Back to Home */}
+{/* Top Navigation Strip */}
 
-      {/* Hero Section */}
-      <div className="max-w-6xl mx-auto mt-24 px-4 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-[#dd727f] leading-tight text-center">
+{/* Back to Home */}
+<div className="pt-20 w-full -ml-4 -mt-1 flex items-center px-6  ">
+ <Link
+  to="/home2"
+  className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow hover:shadow-md transition group"
+>
+  <span className="  font-bold md:mb-1  text-[#6b4b5a]">←</span>
+</Link>
+</div><div className="max-w-6xl mx-auto mt-12 px-4 text-center">        <h1 className="text-3xl md:text-4xl font-bold text-[#dd727f] leading-tight text-center">
           A Tiny Heartbeat, A Growing Miracle,
           <span className="block text-lg text-[#e67885] md:text-xl font-light mt-1">
             And A Journey You’ll Cherish Forever.
@@ -321,7 +303,7 @@ await createPregnancy({
 
         {/* Care Tips */}
         <section>
-          <div className="bg-white/35 backdrop-blur-lg rounded-3xl p-8 shadow-xl">
+          <div className="bg-white/35 mb-10 backdrop-blur-lg rounded-3xl p-8 shadow-xl">
             <h2 className="text-2xl font-semibold text-[#6b4b5a] mb-1">
               Care Tips for This Trimester
             </h2>
@@ -383,52 +365,7 @@ await createPregnancy({
           </div>
         </section>
 
-        {/* Upcoming Appointments */}
-        <section>
-          <h2 className="text-xl font-semibold text-[#9B7E8D] mb-6">
-            Upcoming Appointments
-          </h2>
-
-          <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            <div className="relative bg-gradient-to-br from-pink-100/70 to-white/40 backdrop-blur-xl rounded-3xl p-8 shadow-xl flex items-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-pink-200/70 flex items-center justify-center shadow-md">
-                <FaCalendarAlt className="text-pink-500 text-3xl" />
-              </div>
-
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  Doctor Checkup
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Routine prenatal consultation
-                </p>
-                <p className="mt-3 text-sm font-medium text-pink-600">
-                  25 February 2025
-                </p>
-              </div>
-            </div>
-
-            <div className="relative bg-gradient-to-br from-purple-100/70 to-white/40 backdrop-blur-xl rounded-3xl p-8 shadow-xl flex items-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-purple-200/70 flex items-center justify-center shadow-md">
-                <FaHeartbeat className="text-purple-500 text-3xl" />
-              </div>
-
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  Ultrasound Scan
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Baby growth & heartbeat check
-                </p>
-                <p className="mt-3 text-sm font-medium text-purple-600">
-                  05 March 2025
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </section>
+       
 
       </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaFilePdf, FaUpload, FaBell, FaLock } from "react-icons/fa";
+import { FaFilePdf, FaUpload, FaBell, FaLock, FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { getReports } from "../api/api.js";
 
@@ -12,6 +12,22 @@ const statusStyle = {
 const Medica = () => {
   const [reports, setReports] = useState([]);
 
+const setReminder = () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?._id;
+  if (!userId) {
+    alert("Please log in to set a reminder.");
+    return;
+  }
+
+  const reminder = {
+    message: "Review your blood report before your next appointment",
+    date: new Date().toISOString(),
+  };
+
+  localStorage.setItem(`report_reminder_${userId}`, JSON.stringify(reminder));
+  alert("Reminder set! You'll see it on your home page.");
+};
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -21,7 +37,6 @@ const Medica = () => {
         console.error("Failed to fetch reports", error);
       }
     };
-
     fetchReports();
   }, []);
 
@@ -31,9 +46,12 @@ const Medica = () => {
       {/* Header */}
       <div className="flex justify-between items-end mb-7">
         <div>
-          <h1 className="text-4xl font-semibold text-gray-900 tracking-tight">
-            Medical Reports
-          </h1>
+          <h1 className="text-4xl font-semibold text-gray-900 tracking-tight flex items-center gap-2">
+  <Link to="/home2" className="flex-shrink-0 flex items-center">
+    <FaArrowLeft className="text-black text-2xl pt-1 pr-2 hover:text-[#504f50] cursor-pointer" />
+  </Link>
+  <span className="leading-none md:text-4xl text-2xl">Medical Reports</span>
+</h1>
           <p className="text-sm text-gray-400 mt-1">
             Securely store and access all your health documents
           </p>
@@ -74,7 +92,10 @@ const Medica = () => {
           </div>
         </div>
 
-        <button className="text-xs px-4 py-2 rounded-full bg-[#e58a95] text-white font-medium hover:bg-[#c66470] transition">
+        <button
+          onClick={setReminder}
+          className="text-xs px-4 py-2 rounded-full bg-[#e58a95] text-white font-medium hover:bg-[#c66470] transition"
+        >
           Set Reminder
         </button>
       </div>

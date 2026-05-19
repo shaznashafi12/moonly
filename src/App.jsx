@@ -27,21 +27,27 @@ import Orderpage from "./admin/Orderpage.jsx";
 import ProductPage from "./admin/ProductPage.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import UserActivityModal from "./admin/UserActivityModal.jsx";
-import Admincheck from "./admin/Admincheck.jsx";
-import Adminmed from "./admin/Adminmed.jsx";
-import Settings from "./admin/Settings.jsx";
 import Dahboard from "./admin/Dahboard.jsx";
 import Addcart2 from "./pages/Addcart2.jsx";
 import Check from "./pages/Check.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import Checkout2 from "./pages/Chechout2.jsx";
 import AddProduct from "./admin/Addproduct.jsx";
+import { ToastContainer } from "react-toastify";
+import Userpage from "./pages/Userpage.jsx";
+import Appointment from "./pages/Apointment.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 
 function App() {
   return (
+
     <BrowserRouter>
+      {/* Toast Message Container */}
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <Routes>
-        <Route path="/" element={<Signup />} />
+
+        <Route path="/register" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/option" element={<Option />} />
@@ -55,9 +61,11 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/tracker" element={<Tracker />} />
                 <Route path="/delay" element={<Delay />} />
-<Route path="/addcart2/:id" element={<Addcart2 />} />
+<Route path="/addcart2" element={<Addcart2 />} />
                    <Route path="/check" element={<Check />} />
-             
+                    <Route path="/userr" element={<Userpage />} />
+        <Route path="/" element={<LandingPage />} />
+        
 ///////////////////////////////////////////////////////////
                 <Route path="/home2" element={<Home2/>} />
                 <Route path="/nav2" element={<Nav2/>} />
@@ -67,16 +75,18 @@ function App() {
                 <Route path="/prdiet" element={<Prdiet/>} />
                 <Route path="/checklist" element={<Checklist/>} />
                 <Route path="/cart2" element={<Cart2/>} />
-<Route path="/addcart/:id" element={<Addcart />} />
+<Route path="/addcart" element={<Addcart />} />
+<Route path="/appointment" element={<Appointment />} />
+
 //////////////////////////////////////////////////////////////////////////////
                 <Route path="/sidebar" element={<Sidebar/>} />
                 <Route path="/orderpage" element={<Orderpage/>} />
                 <Route path="/product" element={<ProductPage/>} />
                 <Route path="/adminUsers" element={<AdminUsers/>} />
                 <Route path="/user" element={<UserActivityModal/>} />
-                <Route path="/addcheck" element={<Admincheck/>} />
+                {/* <Route path="/addcheck" element={<Admincheck/>} />
                 <Route path="/adminmed" element={<Adminmed/>} />
-                <Route path="/setting" element={<Settings/>} />
+                <Route path="/setting" element={<Settings/>} /> */}
                 <Route path="/dashboard" element={<Dahboard/>} />
                 <Route path="/checkout" element={<Checkout/>} />
                 <Route path="/checkout2" element={<Checkout2/>} />

@@ -21,26 +21,42 @@ export const logg = async (data) => {
     throw error.response?.data || error.message;
   }
 };
+export const getUsers = async () => {
+  try {
+    return await axios.get(`${API_URL}/user/getAllUsers`);
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
 
 // ------------------- TRACK -------------------
 // Create Mood Track
+// ------------------- TRACK -------------------
+
 export const createTrack = async (data) => {
   try {
-    return await axios.post(`${API_URL}/Track/createtrack`, data);
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    return await axios.post(`${API_URL}/Track/createtrack`, {
+      ...data,
+      userId: user._id,
+    });
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
 
-// Get All Tracks
 export const getTracks = async () => {
   try {
-    return await axios.get(`${API_URL}/Track/gettrack`);
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    return await axios.get(`${API_URL}/Track/gettrack`, {
+      params: { userId: user._id },
+    });
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
-
 // ------------------- PREGNANCY -------------------
 export const createPregnancy = async (data) => {
   try {
@@ -64,27 +80,56 @@ export const getLatestPregnancy = async () => {
 // Upload Report
 // api.js
 // api.js
+// ------------------- REPORTS -------------------
+
+// ------------------- REPORTS -------------------
+
+// ------------------- REPORTS -------------------
+
 export const uploadReport = async (formData) => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("Unauthorized. Please login.");
   try {
-    return await axios.post(`${API_URL}/report/upload`, formData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } catch (error) { throw error.response || error; }
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("No token found. Please login again.");
+    }
+
+    const res = await axios.post(
+      `${API_URL}/report/upload`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+
+    return res;
+
+  } catch (error) {
+    console.error("Upload API error:", error.response || error);
+    throw error.response?.data || error.message;
+  }
 };
 
-// Get reports (user/admin)
 export const getReports = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found. Please login first.");
   try {
-    return await axios.get(`${API_URL}/report/all`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(`${API_URL}/report/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
-  } catch (error) { throw error.response || error; }
+
+    return res;
+
+  } catch (error) {
+    console.error(error);
+    throw error.response?.data || error.message;
+  }
 };
-// ------------------- CHECKLIST -------------------
 export const saveChecklist = async (data) => {
   try {
     return await axios.post(`${API_URL}/checklist/save`, data);
@@ -95,12 +140,11 @@ export const saveChecklist = async (data) => {
 
 export const getChecklist = async (userId) => {
   try {
-    return await axios.get(`${API_URL}/checklist/${userId}`);
+    return await axios.get(`${API_URL}/checklist/user/${userId}`);
   } catch (error) {
     throw error.response?.data || error.message;
   }
 };
-
 // ------------------- ORDERS -------------------
 export const createOrder = async (data) => {
   try {
@@ -174,6 +218,26 @@ export const getCycle = async (userId) => {
   try {
     return await axios.get(`${API_URL}/cycle/${userId}`);
   } catch (error) {
+    // ✅ If no data exists, return safe response instead of throwing
+    if (error.response?.status === 404) {
+      return { data: { cycle: null } };
+    }
+
+    // ❌ Only throw real errors
     throw error.response?.data || error.message;
   }
+};
+
+
+export const getWater = async (userId, date) => {
+  return await axios.get(`${API_URL}/api/water/${userId}/${date}`);
+};
+
+export const updateWater = async (userId, date, intake) => {
+  return await axios.put(`${API_URL}/api/water/${userId}/${date}`, {
+    intake
+  });
+};
+export const getAllProducts = async () => {
+  return await axios.get(`${API_URL}/api/products/all`);
 };
