@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { FaLock } from "react-icons/fa";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Forgot = () => {
 
   const [email, setEmail] = useState("");
@@ -12,7 +14,7 @@ const Forgot = () => {
   // Send OTP
   const handleSendOTP = async () => {
     try {
-      await axios.post("http://localhost:4000/user/send-otp", { email });
+await axios.post(`${API_URL}/user/send-otp`, { email });
       alert("OTP sent to your email");
     } catch (error) {
       alert(error.response?.data?.message || "Error sending OTP");
@@ -44,7 +46,7 @@ const Forgot = () => {
     try {
       const finalOtp = otp.join("");
 
-      await axios.post("http://localhost:4000/user/verify-otp", {
+await axios.post(`${API_URL}/user/verify-otp`, {
         email,
         otp: finalOtp,
         newPassword,

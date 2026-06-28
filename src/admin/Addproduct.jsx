@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../admin/Sidebar.jsx";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
 const Addproduct = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -41,9 +42,11 @@ const Addproduct = () => {
     data.append("image", image);
 
     try {
-      await axios.post("http://localhost:4000/api/products", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+     await axios.post(`${API_URL}/api/products`, data, {
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
+});
 
       alert("Product added successfully ✅");
 
